@@ -19,9 +19,23 @@ class Hito(pg.sprite.Sprite):
         self.img = pg.transform.rotozoom(self.img,0,0.25)
         self.img=pg.transform.flip(self.img,True,False)
         self.rect = self.img.get_rect()
+        self.type = "run"
+        self.janptop = -300
+        self.janp = 0
 
     def update(self,screen: pg.Surface):
-        screen.blit(self.img, [WIDTH/2,HEIGHT/2])
+        if self.type == "janpup":
+            self.janp -= 10
+        if self.janp < self.janptop:
+            self.type ="janpdown"
+            print(self.janp)
+        if self.type == "janpdown":
+            self.janp += 10
+            if self.janp == 0:
+                self.type = "run"
+            
+        screen.blit(self.img, [WIDTH/4,HEIGHT/2+100+self.janp])
+
 
 
 
@@ -35,6 +49,9 @@ def main():
     clock  = pg.time.Clock()
     bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
     bg_img_2=pg.transform.flip(bg_img,True,False)
+    yuka = pg.image.load("ex05/fig/renga.png")
+    rect = yuka.get_rect()
+    print(rect)
     hito = Hito()
     
     
@@ -45,10 +62,19 @@ def main():
 
         for event in pg.event.get():
             if event.type == pg.QUIT: return
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                hito.type = "janpup"
+                print("hello")
+
         x = tmr%3200
         screen.blit(bg_img, [-x, 0])
         screen.blit(bg_img_2,[1600-x,0])
         screen.blit(bg_img,[3200-x,0])
+        screen.blit(yuka,[-x,HEIGHT/2+261])
+        screen.blit(yuka,[1600-x,HEIGHT/2+261])
+        screen.blit(yuka,[3200-x,HEIGHT/2+261])
+
+
 
         
 
@@ -56,14 +82,14 @@ def main():
         hito.update(screen)
 
         pg.display.update()
-        tmr += 1 
+        tmr += 10
 
 
         
         
         
 
-        clock.tick(60)
+        clock.tick(100)
 
 
 if __name__ == "__main__":
