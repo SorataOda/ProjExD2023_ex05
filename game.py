@@ -14,6 +14,7 @@ class Hito(pg.sprite.Sprite):
 
     def __init__(self):
         """
+        初期化メゾット
         """
         self.img=pg.image.load("ex05/fig/hito1.png")
         self.img = pg.transform.rotozoom(self.img,0,0.25)
@@ -24,23 +25,20 @@ class Hito(pg.sprite.Sprite):
         self.janp = 0
 
     def update(self,screen: pg.Surface):
+        """
+        updateメゾット
+        self.typeを3つにわけ、ジャンプを表現
+        """
         if self.type == "janpup":
             self.janp -= 10
         if self.janp < self.janptop:
             self.type ="janpdown"
-            print(self.janp)
         if self.type == "janpdown":
             self.janp += 10
             if self.janp == 0:
                 self.type = "run"
             
         screen.blit(self.img, [WIDTH/4,HEIGHT/2+100+self.janp])
-
-
-
-
-
-
 
 
 def main():
@@ -64,7 +62,6 @@ def main():
             if event.type == pg.QUIT: return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 hito.type = "janpup"
-                print("hello")
 
         x = tmr%3200
         screen.blit(bg_img, [-x, 0])
@@ -81,14 +78,10 @@ def main():
 
         hito.update(screen)
 
+
         pg.display.update()
+
         tmr += 10
-
-
-        
-        
-        
-
         clock.tick(100)
 
 
