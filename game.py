@@ -20,6 +20,7 @@ class Hito(pg.sprite.Sprite):
         self.img = pg.transform.rotozoom(self.img,0,0.25)
         self.img=pg.transform.flip(self.img,True,False)
         self.rect = self.img.get_rect()
+        self.rect.center = WIDTH/2 ,(HEIGHT/2)+165
         self.type = "run"
         self.janptop = -25
         self.janp = 0
@@ -40,7 +41,7 @@ class Hito(pg.sprite.Sprite):
                 self.type = "run"
                 self.janp = 0
         self.rect.move_ip(0,self.janp)
-        screen.blit(self.img, move_ip(0, self.rect))
+        screen.blit(self.img, self.rect)
 
 
 def main():
