@@ -21,7 +21,7 @@ class Hito(pg.sprite.Sprite):
         self.img=pg.transform.flip(self.img,True,False)
         self.rect = self.img.get_rect()
         self.type = "run"
-        self.janptop = -300
+        self.janptop = -25
         self.janp = 0
 
     def update(self,screen: pg.Surface):
@@ -30,15 +30,17 @@ class Hito(pg.sprite.Sprite):
         self.typeを3つにわけ、ジャンプを表現
         """
         if self.type == "janpup":
-            self.janp -= 10
-        if self.janp < self.janptop:
-            self.type ="janpdown"
-        if self.type == "janpdown":
-            self.janp += 10
-            if self.janp == 0:
+            self.janp -= 1
+            if self.janp < self.janptop:
+                self.type ="janpdown"
+                self.janp = 0
+        elif self.type == "janpdown":
+            self.janp += 1
+            if self.rect.centery >= (HEIGHT/2)+165 :
                 self.type = "run"
-            
-        screen.blit(self.img, [WIDTH/4,HEIGHT/2+100+self.janp])
+                self.janp = 0
+        self.rect.move_ip(0,self.janp)
+        screen.blit(self.img, move_ip(0, self.rect))
 
 
 def main():
