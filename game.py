@@ -1,4 +1,5 @@
 import random
+import shelve
 import sys
 import time
 from typing import Any
@@ -86,6 +87,37 @@ class Hito(pg.sprite.Sprite):
 
             
         screen.blit(self.img, self.rect)
+        #screen.blit(self.img, [WIDTH/2,HEIGHT/2])
+
+
+class Score:
+    """
+    取得コインに対応するスコアを表示するクラス
+    """
+    def __init__(self):
+        self.font = pg.font.Font(None, 50)
+        self.color = (0, 0, 0)
+        self.score = 0
+        self.image = self.font.render(f"Score: {self.score}", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = 100, 50  
+
+    def score_up(self, add): #スコアを増やす関数
+        self.score += add
+
+    def update(self, screen: pg.Surface): #スコアを更新、表示する関数
+        if 100<self.score<500:
+            self.font=pg.font.Font(None, 55)
+            self.color=(80,0,0)
+        elif 500<=self.score<1000:
+            self.font=pg.font.Font(None, 60)
+            self.color=(160,0,0)
+        elif 1000<=self.score:
+            self.font=pg.font.Font(None, 65)
+            self.color=(255,0,0)
+        self.image = self.font.render(f"Score: {self.score}", 0,self.color)
+        screen.blit(self.image,self.rect)
+    
 
 
 class Item(pg.sprite.Sprite):
@@ -107,6 +139,28 @@ class Item(pg.sprite.Sprite):
         self.rect.centerx += self.vx
         if self.use == "on":
             self.kill()
+
+class Coin(pg.sprite.Sprite):
+    """
+    coinに関するクラス
+    """
+    imgs = [pg.image.load(f"ex05/fig/coin{i}.png") for i in range(1, 4)]
+    def __init__(self,num):
+        """
+
+        """
+        super().__init__()
+        self.image = __class__.imgs[num]
+        #self.image = random.choice(__class__.imgs)
+        #self.image=pg.image.load("ex05/fig/coin1.png")
+        self.image=pg.transform.rotozoom(self.image,0,0.1)
+        self.rect=self.image.get_rect()
+        self.rect.centerx=WIDTH
+        self.rect.centery=random.randint(HEIGHT/3,HEIGHT*2/3)
+        self.vx = -10
+
+    def update(self):
+        self.rect.centerx+=self.vx
 
 
 class Coin(pg.sprite.Sprite):
@@ -141,14 +195,17 @@ def main():
 
     items = pg.sprite.Group()
     hito = Hito()
-
+    coins1 = pg.sprite.Group()
+    coins2 = pg.sprite.Group()
+    coins3 = pg.sprite.Group()
+    score = Score()
     coins=pg.sprite.Group()
 
     tmr = 0
     x = 0
+
+
     while True:
-
-
         for event in pg.event.get():
             if event.type == pg.QUIT: return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
@@ -169,6 +226,14 @@ def main():
         screen.blit(yuka,[-x,HEIGHT/2+261])
         screen.blit(yuka,[1600-x,HEIGHT/2+261])
         screen.blit(yuka,[3200-x,HEIGHT/2+261])
+        #score.score=10*len(pg.sprite.spritecollide(hito,coins,True))
+        for i in pg.sprite.spritecollide(hito,coins1,True): #コインとぶつかったらスコアを1増やす
+            score.score_up(10)
+        for i in pg.sprite.spritecollide(hito,coins2,True): #コインとぶつかったらスコアを1増やす
+            score.score_up(100)
+        for i in pg.sprite.spritecollide(hito,coins3,True): #コインとぶつかったらスコアを1増やす
+            score.score_up(1000)
+        score.update(screen)
 
         if tmr%10000 == 0:
             items.add(Item())
@@ -186,11 +251,30 @@ def main():
             pg.display.update()
             time.sleep(2)
             return
+          
         hito.update(screen)
 
         items.update()
         items.draw(screen)
         if tmr%random.randint(1,1500)==0:
+            num=random.randint(0,3)
+            if num==0:
+                coins1.add(Coin(num))
+            elif num==1:
+                coins2.add(Coin(num))
+            elif num==2:
+                coins3.add(Coin(num))
+        print(coins1)
+        print(coins2)
+        print(coins3)
+
+        coins1.update()
+        coins1.draw(screen)
+        coins2.update()
+        coins2.draw(screen)
+        coins3.update()
+        coins3.draw(screen)
+        
             coins.add(Coin())
             print(coins)
 
