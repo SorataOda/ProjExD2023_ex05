@@ -40,7 +40,7 @@ class Hito(pg.sprite.Sprite):
         self.rect.center = WIDTH/2,(HEIGHT/2)+165
         self.type = "run"
         self.state = "nomal"
-        self.janptop = -20
+        self.janptop = -27
         self.janp = 0        
         self.item = False
         self.vx = -1
@@ -54,7 +54,7 @@ class Hito(pg.sprite.Sprite):
 
     def item_use(self,life: int):
         self.item = True
-        self.item_life = 500
+        self.item_life  = life
 
     def change_img(self,name: str ,num:int,screen:pg.Surface):
         """
@@ -168,7 +168,6 @@ class Coin(pg.sprite.Sprite):
     imgs = [pg.image.load(f"ex05/fig/coin{i}.png") for i in range(1, 4)]
     def __init__(self,num):
         """
-
         """
         super().__init__()
         self.image = __class__.imgs[num]
@@ -183,6 +182,23 @@ class Coin(pg.sprite.Sprite):
     def update(self):
         self.rect.centerx+=self.vx
 
+
+class Obstecle(pg.sprite.Sprite):
+    """
+    障害物に関するクラス
+    """
+    def __init__(self):
+        super().__init__()
+        self.image = pg.image.load("ex05/fig/enemy.png ")
+        self.image = pg.transform.rotozoom(self.image,0,0.225)
+        self.rect = self.image.get_rect()
+        self.rect.center = WIDTH,random.randint((HEIGHT/2+261),HEIGHT/2+270)
+        self.vx = -10
+    def update(self):
+        """
+        updateメゾット
+        """
+        self.rect.centerx += self.vx
 
 def main():
     pg.display.set_caption("gmae")
@@ -200,6 +216,7 @@ def main():
     coins3 = pg.sprite.Group()
     score = Score()
     coins=pg.sprite.Group()
+    obstecles = pg.sprite.Group()
 
     tmr = 0
     x = 0
@@ -211,7 +228,8 @@ def main():
             if event.type == pg.QUIT: 
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
-                if score.score >= 0:
+                if score.score >= 100:
+                    score.score -= 100
                     hito.change_state("hyper",300)
                     hito.change_img("UC.NTD.png",1.0,screen)
                     print(hito.state)
@@ -238,15 +256,32 @@ def main():
         for i in pg.sprite.spritecollide(hito,coins2,True): #コインとぶつかったらスコアを1増やす
             score.score_up(100)
         for i in pg.sprite.spritecollide(hito,coins3,True): #コインとぶつかったらスコアを1増やす
-            score.score_up(1000)
+            score.score_up(500)
         score.update(screen)
 
-        if tmr%10000 == 0:
+        if tmr%5000 == 0:
             items.add(Item())
 
         for item in pg.sprite.spritecollide(hito,items,True):
             item.use = "on"
-            hito.item_use(1)
+            hito.item_use(200)
+
+        if tmr%(random.randint(300,1000 )) == 0:
+            obstecles.add(Obstecle())
+        
+        for obstecle in pg.sprite.spritecollide(hito,obstecles,True):
+            if hito.state == "hyper":
+                score.score_up(300)
+            else:
+                gameover_str = pg.image.load("ex05/fig/gameover.png")
+                screen.blit(gameover_str,[WIDTH/2-562,HEIGHT/2-141])
+                hito.change_img("die.png",0.5,screen)
+                obstecles.update()
+                obstecles.draw(screen)
+                #score.update(screen)
+                pg.display.update()
+                time.sleep(2)
+                return
 
         yoko,tate = check_bound(hito)
         if not yoko or not tate:
@@ -280,6 +315,10 @@ def main():
 
         coins.update()
         coins.draw(screen)
+
+        obstecles.update()
+        obstecles.draw(screen)
+
 
         pg.display.update()
 
