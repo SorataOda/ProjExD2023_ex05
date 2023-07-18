@@ -168,7 +168,6 @@ class Coin(pg.sprite.Sprite):
     imgs = [pg.image.load(f"ex05/fig/coin{i}.png") for i in range(1, 4)]
     def __init__(self,num):
         """
-
         """
         super().__init__()
         self.image = __class__.imgs[num]
@@ -182,6 +181,7 @@ class Coin(pg.sprite.Sprite):
 
     def update(self):
         self.rect.centerx+=self.vx
+
 
 class Obstecle(pg.sprite.Sprite):
     """
@@ -228,8 +228,8 @@ def main():
             if event.type == pg.QUIT: 
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
-                if score.score >= 1000:
-                    score.score -= 1000
+                if score.score >= 100:
+                    score.score -= 100
                     hito.change_state("hyper",300)
                     hito.change_img("UC.NTD.png",1.0,screen)
                     print(hito.state)
