@@ -1,4 +1,6 @@
+import random
 import sys
+import time
 from typing import Any
 import pygame as pg
 from pygame.sprite import AbstractGroup
@@ -20,10 +22,17 @@ class Hito(pg.sprite.Sprite):
         self.img = pg.transform.rotozoom(self.img,0,0.25)
         self.img=pg.transform.flip(self.img,True,False)
         self.rect = self.img.get_rect()
-        self.rect.center = WIDTH/2 ,(HEIGHT/2)+165
+        self.rect.center = WIDTH/2,(HEIGHT/2)+165
         self.type = "run"
-        self.janptop = -25
-        self.janp = 0
+        self.janptop = -20
+        self.janp = 0        
+        self.item = False
+        self.vx = -1
+        self.item_life = 0
+
+    def item_use(self,life: int):
+        self.item = True
+        self.item_life = 500
 
     def update(self,screen: pg.Surface):
         """
@@ -42,6 +51,41 @@ class Hito(pg.sprite.Sprite):
                 self.janp = 0
         self.rect.move_ip(0,self.janp)
         screen.blit(self.img, self.rect)
+        if self.item == True:
+            if self.rect.centerx > WIDTH:
+                self.rect.move_ip(0,+self.janp)
+            else:
+                self.rect.move_ip(+2, +self.janp)
+            self.item_life -= 1
+            if self.item_life == 0:
+                self.item = False
+        if self.item == False:
+            self.rect.move_ip(-1,+self.janp)
+
+            
+        screen.blit(self.img, self.rect)
+
+
+class Item(pg.sprite.Sprite):
+    """
+    アイテムに関するクラス
+    """
+    def __init__(self):
+        super().__init__()
+        self.image = pg.image.load("ex05/fig/item.png")
+        self.image = pg.transform.rotozoom(self.image,-10,0.1)
+        self.rect = self.image.get_rect()
+        self.rect.center = WIDTH,random.randint((HEIGHT/2-200),HEIGHT/2+200)
+        self.vx = -6
+        self.use = "not"
+    def update(self):
+        """
+        updateメゾット
+        """
+        self.rect.centerx += self.vx
+        if self.use == "on":
+            self.kill()
+
 
 
 def main():
@@ -51,8 +95,8 @@ def main():
     bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
     bg_img_2=pg.transform.flip(bg_img,True,False)
     yuka = pg.image.load("ex05/fig/renga.png")
-    rect = yuka.get_rect()
-    print(rect)
+
+    items = pg.sprite.Group()
     hito = Hito()
     
     
@@ -64,7 +108,8 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                hito.type = "janpup"
+                if hito.type == "run":
+                    hito.type = "janpup"
 
         x = tmr%3200
         screen.blit(bg_img, [-x, 0])
@@ -74,12 +119,21 @@ def main():
         screen.blit(yuka,[1600-x,HEIGHT/2+261])
         screen.blit(yuka,[3200-x,HEIGHT/2+261])
 
+        if tmr%10000 == 0:
+            items.add(Item())
 
+        for item in pg.sprite.spritecollide(hito,items,True):
+            item.use = "on"
+            hito.item_use(50)
+            
+            
 
-        
-
+            #score.score_up(10)  # 1点アップ
 
         hito.update(screen)
+
+        items.update()
+        items.draw(screen)
 
 
         pg.display.update()
