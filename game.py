@@ -9,6 +9,19 @@ from pygame.sprite import AbstractGroup
 WIDTH = 1600
 HEIGHT = 900
 
+def check_bound(obj: pg.Rect) -> tuple[bool, bool]:
+    """
+    オブジェクトが画面内か画面外かを判定し，真理値タプルを返す
+    引数 obj：オブジェクト hito SurfaceのRect
+    戻り値：横方向，縦方向のはみ出し判定結果（画面内：True／画面外：False）
+    """
+    yoko, tate = True, True
+    if obj.rect.left < 0 :  # 横方向のはみ出し判定
+        yoko = False
+    if obj.rect.top < 0 or HEIGHT < obj.rect.bottom:  # 縦方向のはみ出し判定
+        tate = False
+    return yoko, tate
+
 class Hito(pg.sprite.Sprite):
     """
     操作する人に関するクラス
@@ -34,6 +47,17 @@ class Hito(pg.sprite.Sprite):
         self.item = True
         self.item_life = 500
 
+    def change_img(self,name: str ,screen:pg.Surface):
+        """
+        主人公の画像を差し替えるメゾット
+        引数1：name　ファイル名.拡張子
+        引数2：screen
+        """
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{name}"), 0, 0.5)
+        screen.blit(self.image, self.rect)
+
+    
+
     def update(self,screen: pg.Surface):
         """
         updateメゾット
@@ -49,8 +73,6 @@ class Hito(pg.sprite.Sprite):
             if self.rect.centery >= (HEIGHT/2)+165 :
                 self.type = "run"
                 self.janp = 0
-        self.rect.move_ip(0,self.janp)
-        screen.blit(self.img, self.rect)
         if self.item == True:
             if self.rect.centerx > WIDTH:
                 self.rect.move_ip(0,+self.janp)
@@ -78,14 +100,13 @@ class Item(pg.sprite.Sprite):
         self.rect.center = WIDTH,random.randint((HEIGHT/2-200),HEIGHT/2+200)
         self.vx = -6
         self.use = "not"
-    def update(self):
+    def update(self,):
         """
         updateメゾット
         """
         self.rect.centerx += self.vx
         if self.use == "on":
             self.kill()
-
 
 
 def main():
@@ -98,7 +119,6 @@ def main():
 
     items = pg.sprite.Group()
     hito = Hito()
-    
     
     tmr = 0
     x = 0
@@ -125,6 +145,17 @@ def main():
         for item in pg.sprite.spritecollide(hito,items,True):
             item.use = "on"
             hito.item_use(50)
+
+        yoko,tate = check_bound(hito)
+        if not yoko or not tate:
+            hito.change_img("die.png",screen)
+            #score.update(screen)
+            gameover_str = pg.image.load("ex05/fig/gameover.png")
+            screen.blit(gameover_str,[WIDTH/2-562,HEIGHT/2-141])
+            pg.display.update()
+            time.sleep(2)
+            return
+
             
             
 
