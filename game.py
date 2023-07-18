@@ -78,7 +78,6 @@ def main():
         screen.blit(bg_img, [-x, 0])
         screen.blit(bg_img_2,[1600-x,0])
         screen.blit(bg_img,[3200-x,0])
-       # for i in pg.sprite.spritecollide(hito,coins,True): #コインとぶつかったらスコアを1増やす
         score.score=10*len(pg.sprite.spritecollide(hito,coins,True))
         score.update(screen)
 
