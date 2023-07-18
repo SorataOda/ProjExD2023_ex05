@@ -1,4 +1,5 @@
 import sys
+import random
 from typing import Any
 import pygame as pg
 from pygame.sprite import AbstractGroup
@@ -41,6 +42,28 @@ class Hito(pg.sprite.Sprite):
         screen.blit(self.img, [WIDTH/4,HEIGHT/2+100+self.janp])
 
 
+class Coin(pg.sprite.Sprite):
+    """
+    coinに関するクラス
+    """
+    imgs = [pg.image.load(f"ex05/fig/coin{i}.png") for i in range(1, 4)]
+    def __init__(self):
+        """
+
+        """
+        super().__init__()
+        self.image = random.choice(__class__.imgs)
+        #self.image=pg.image.load("ex05/fig/coin1.png")
+        self.image=pg.transform.rotozoom(self.image,0,0.1)
+        self.rect=self.image.get_rect()
+        self.rect.centerx=WIDTH
+        self.rect.centery=random.randint(HEIGHT/3,HEIGHT*2/3)
+        self.vx = -10
+
+    def update(self):
+        self.rect.centerx+=self.vx
+
+
 def main():
     pg.display.set_caption("gmae")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -52,6 +75,7 @@ def main():
     print(rect)
     hito = Hito()
     
+    coins=pg.sprite.Group()
     
     tmr = 0
     x = 0
@@ -62,6 +86,12 @@ def main():
             if event.type == pg.QUIT: return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 hito.type = "janpup"
+        
+        #for i, coin in enumerate(coins):
+            #if coin.rect.colliderect(hito.rect):
+                #coins[i] = None
+                #print("b")
+                #pg.display.update()
 
         x = tmr%3200
         screen.blit(bg_img, [-x, 0])
@@ -77,6 +107,13 @@ def main():
 
 
         hito.update(screen)
+
+        if tmr%random.randint(1,1500)==0:
+            coins.add(Coin())
+            print(coins)
+
+        coins.update()
+        coins.draw(screen)
 
 
         pg.display.update()
