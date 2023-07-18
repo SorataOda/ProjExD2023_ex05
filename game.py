@@ -1,3 +1,4 @@
+import sys
 import random
 import shelve
 import sys
@@ -38,24 +39,33 @@ class Hito(pg.sprite.Sprite):
         self.rect = self.img.get_rect()
         self.rect.center = WIDTH/2,(HEIGHT/2)+165
         self.type = "run"
+        self.state = "nomal"
         self.janptop = -20
         self.janp = 0        
         self.item = False
         self.vx = -1
         self.item_life = 0
+        self.hyper_life = -1
+
+    def change_state(self,state:str,hyper_life:int):
+        self.state = state
+        self.hyper_life = hyper_life
+
 
     def item_use(self,life: int):
         self.item = True
         self.item_life = 500
 
-    def change_img(self,name: str ,screen:pg.Surface):
+    def change_img(self,name: str ,num:int,screen:pg.Surface):
         """
         主人公の画像を差し替えるメゾット
         引数1：name　ファイル名.拡張子
         引数2：screen
         """
-        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{name}"), 0, 0.5)
-        screen.blit(self.image, self.rect)
+        self.img = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{name}"), 0, num)
+        #self.rect = self.image.get_rect()
+        
+        screen.blit(self.img, self.rect)
 
     
 
@@ -64,6 +74,15 @@ class Hito(pg.sprite.Sprite):
         updateメゾット
         self.typeを3つにわけ、ジャンプを表現
         """
+        if self.state == "hyper":
+            self.hyper_life -= 1
+
+        if self.hyper_life == 0:
+            self.change_state("normal", -1)
+            self.img=pg.image.load("ex05/fig/hito1.png")
+            self.img =pg.transform.rotozoom(self.img,0,0.25)
+            self.img=pg.transform.flip(self.img,True,False)
+
         if self.type == "janpup":
             self.janp -= 1
             if self.janp < self.janptop:
@@ -84,6 +103,8 @@ class Hito(pg.sprite.Sprite):
                 self.item = False
         if self.item == False:
             self.rect.move_ip(-1,+self.janp)
+
+        
 
             
         screen.blit(self.img, self.rect)
@@ -163,32 +184,11 @@ class Coin(pg.sprite.Sprite):
         self.rect.centerx+=self.vx
 
 
-class Coin(pg.sprite.Sprite):
-    """
-    coinに関するクラス
-    """
-    imgs = [pg.image.load(f"ex05/fig/coin{i}.png") for i in range(1, 4)]
-    def __init__(self):
-        """
-
-        """
-        super().__init__()
-        self.image = random.choice(__class__.imgs)
-        #self.image=pg.image.load("ex05/fig/coin1.png")
-        self.image=pg.transform.rotozoom(self.image,0,0.1)
-        self.rect=self.image.get_rect()
-        self.rect.centerx=WIDTH
-        self.rect.centery=random.randint(HEIGHT/3,HEIGHT*2/3)
-        self.vx = -10
-
-    def update(self):
-        self.rect.centerx+=self.vx
-
-
 def main():
     pg.display.set_caption("gmae")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock  = pg.time.Clock()
+    score = Score()
     bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
     bg_img_2=pg.transform.flip(bg_img,True,False)
     yuka = pg.image.load("ex05/fig/renga.png")
@@ -203,11 +203,18 @@ def main():
 
     tmr = 0
     x = 0
-
-
+    
     while True:
+
+
         for event in pg.event.get():
-            if event.type == pg.QUIT: return
+            if event.type == pg.QUIT: 
+                return 0
+            if event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
+                if score.score >= 0:
+                    hito.change_state("hyper",300)
+                    hito.change_img("UC.NTD.png",1.0,screen)
+                    print(hito.state)
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 if hito.type == "run":
                     hito.type = "janpup"
@@ -217,7 +224,6 @@ def main():
                 #coins[i] = None
                 #print("b")
                 #pg.display.update()
-
 
         x = tmr%3200
         screen.blit(bg_img, [-x, 0])
@@ -240,11 +246,11 @@ def main():
 
         for item in pg.sprite.spritecollide(hito,items,True):
             item.use = "on"
-            hito.item_use(50)
+            hito.item_use(1)
 
         yoko,tate = check_bound(hito)
         if not yoko or not tate:
-            hito.change_img("die.png",screen)
+            hito.change_img("die.png",0.5,screen)
             #score.update(screen)
             gameover_str = pg.image.load("ex05/fig/gameover.png")
             screen.blit(gameover_str,[WIDTH/2-562,HEIGHT/2-141])
@@ -264,9 +270,6 @@ def main():
                 coins2.add(Coin(num))
             elif num==2:
                 coins3.add(Coin(num))
-        print(coins1)
-        print(coins2)
-        print(coins3)
 
         coins1.update()
         coins1.draw(screen)
@@ -274,9 +277,6 @@ def main():
         coins2.draw(screen)
         coins3.update()
         coins3.draw(screen)
-        
-            coins.add(Coin())
-            print(coins)
 
         coins.update()
         coins.draw(screen)
