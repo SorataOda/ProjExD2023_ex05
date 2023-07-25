@@ -16,6 +16,7 @@ def check_bound(obj: pg.Rect) -> tuple[bool, bool]:
     オブジェクトが画面内か画面外かを判定し，真理値タプルを返す
     引数 obj：オブジェクト hito SurfaceのRect
     戻り値：横方向，縦方向のはみ出し判定結果（画面内：True／画面外：False）
+    こうかとんのゲームを参照に作成。
     """
     yoko, tate = True, True
     if obj.rect.left < 0 :  # 横方向のはみ出し判定
@@ -27,6 +28,10 @@ def check_bound(obj: pg.Rect) -> tuple[bool, bool]:
 class Hito(pg.sprite.Sprite):
     """
     操作する人に関するクラス
+    __init__() :初期化メゾット
+    change_state():主人公の状態を変更するメゾット
+    item_use():アイテムを使うときに使うメゾット（）
+
     """
 
     def __init__(self):
@@ -220,6 +225,7 @@ def main():
 
     tmr = 0
     x = 0
+    o_int = 0
     
     while True:
 
@@ -228,11 +234,10 @@ def main():
             if event.type == pg.QUIT: 
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
-                if score.score >= 100:
-                    score.score -= 100
+                if score.score >= 500:
+                    score.score -= 500
                     hito.change_state("hyper",300)
                     hito.change_img("UC.NTD.png",1.0,screen)
-                    print(hito.state)
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 if hito.type == "run":
                     hito.type = "janpup"
@@ -243,7 +248,8 @@ def main():
                 #print("b")
                 #pg.display.update()
 
-        x = tmr%3200
+        x = tmr%3200     #時間に関する変数
+
         screen.blit(bg_img, [-x, 0])
         screen.blit(bg_img_2,[1600-x,0])
         screen.blit(bg_img,[3200-x,0])
@@ -266,8 +272,11 @@ def main():
             item.use = "on"
             hito.item_use(200)
 
-        if tmr%(random.randint(300,1000 )) == 0:
-            obstecles.add(Obstecle())
+        if o_int <= 0:
+            if tmr%(random.randint(300,1000 )) == 0:
+                obstecles.add(Obstecle())
+                o_int = 1000
+                print(o_int)
         
         for obstecle in pg.sprite.spritecollide(hito,obstecles,True):
             if hito.state == "hyper":
@@ -278,7 +287,7 @@ def main():
                 hito.change_img("die.png",0.5,screen)
                 obstecles.update()
                 obstecles.draw(screen)
-                #score.update(screen)
+                score.update(screen)
                 pg.display.update()
                 time.sleep(2)
                 return
@@ -286,7 +295,7 @@ def main():
         yoko,tate = check_bound(hito)
         if not yoko or not tate:
             hito.change_img("die.png",0.5,screen)
-            #score.update(screen)
+            score.update(screen)
             gameover_str = pg.image.load("ex05/fig/gameover.png")
             screen.blit(gameover_str,[WIDTH/2-562,HEIGHT/2-141])
             pg.display.update()
@@ -322,7 +331,8 @@ def main():
 
         pg.display.update()
 
-        tmr += 10
+        tmr += 10   #時間を進める。
+        o_int -= 10
         clock.tick(100)
 
 
