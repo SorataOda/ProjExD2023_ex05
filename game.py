@@ -102,7 +102,7 @@ class Hito(pg.sprite.Sprite):
             if self.rect.centerx > WIDTH:
                 self.rect.move_ip(0,+self.janp)
             else:
-                self.rect.move_ip(+2, +self.janp)
+                self.rect.move_ip(+1, +self.janp)
             self.item_life -= 1
             if self.item_life == 0:
                 self.item = False
@@ -234,8 +234,8 @@ def main():
             if event.type == pg.QUIT: 
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
-                if score.score >= 500:
-                    score.score -= 500
+                if score.score >= 1000:
+                    score.score -= 1000
                     hito.change_state("hyper",300)
                     hito.change_img("UC.NTD.png",1.0,screen)
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
@@ -276,7 +276,6 @@ def main():
             if tmr%(random.randint(300,1000 )) == 0:
                 obstecles.add(Obstecle())
                 o_int = 1000
-                print(o_int)
         
         for obstecle in pg.sprite.spritecollide(hito,obstecles,True):
             if hito.state == "hyper":
